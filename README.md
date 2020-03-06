@@ -1,3 +1,5 @@
+Installing CP4A on OCP on IBMCloud
+----
 These are the steps I took to install the CP4A on managed OpenShift running on IBM Cloud. 
 
 This is very specific to the current versions and will likely be outdated information in the very near future because of changes to OCP and CP4A, however these are the steps I completed to install in OCP version 4.3.1 running on IBM Cloud.  I'm installing Cloud Pak for Apps version 4.0.1
@@ -17,12 +19,14 @@ Login to cluster and install Service mesh (NOT THE COMMUNITY ONE)
 Following these instructions, but summarizing and customizing for exactly what I did
 https://docs.openshift.com/container-platform/4.2/service_mesh/service_mesh_install/installing-ossm.html#ossm-operator-install-istio_installing-ossm
 
-Operators --> OperatorHub --> Search for `Service Mesh` select *Red Hat OpenShift Service Mesh* NOT THE COMMMUNITY ONE (Should be version 1.0.8 (sometimes the GUI shows 1.0.2, but it's actually higher)
+Operators --> OperatorHub --> Search for `Service Mesh`. 
+Select: *Red Hat OpenShift Service Mesh* NOT THE COMMMUNITY ONE (Should be version 1.0.8 (sometimes the GUI shows 1.0.2, but it's actually higher)
 
 
 Create Control Plane
 --
-Operators —> Installed Operators.   Project = istio-system. 
+Operators —> Installed Operators.   Project = istio-system.   
+
       Select:  Red Hat OpenShift Service Mesh —> Istio Service Mesh Control Plane —> Create ServiceMeshControlPlane (Modify YAML if you want, but I didn’t) —> Create
       
 This takes about 5 minutes to complete, you can view if it's complete by running this command
@@ -30,7 +34,8 @@ This takes about 5 minutes to complete, you can view if it's complete by running
 
 Create Member Roll
 --
-Operators —> Installed Operators.   Project = istio-system. 
+Operators —> Installed Operators.   Project = istio-system.   
+
       Select: Red Hat OpenShift Service Mesh —> Istio Service Mesh Member Roll —> Create ServiceMeshMemberRoll —> Modify YAML to add members, require: knative-serving, tekton-pipelines, kabanero —> Create
 Here is my YAML
 ```YAML
