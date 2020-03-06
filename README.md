@@ -57,7 +57,7 @@ Remove installed version of elasticsearch, it conflicts with CP4A
 `oc delete sub elasticsearch-operator-4.3-redhat-operators-openshift-marketplace -n openshift-operators`
 `oc delete clusterserviceversion elasticsearch-operator.4.3.1-202002032140 -n openshift-operators`
 
-Install CP4A
+Download the configuration files to install CP4A
 --
 Important to add the `--skip-tags servicemesh` since we installed it manually. 
 
@@ -81,4 +81,45 @@ https://github.ibm.com/CloudPakOpenContent/cloudpak-entitlement
 Follow same instructions as above to install, however use `ENTITLED_REGISTRY_USER: ekey` instead of `cp`
 
 
+Setting the Storage class for TA
+--
+TA uses couchdb, which needs a PersistentVolume with RWX permissions.  By default OCP on IBM Cloud uses storage class `bmc-block-bronze`, which is block storage.  For block storage you can't have RWX permission.  
+
+To fix this, you can set the storage class to file type.  There are many options if you look in Storage --> Storage Classes. 
+I chose `ibmc-file-gold-gid`.  
+*Note:* ibmc-file-gold doesn't work, it doesn't have the right permissions or whatever.  Not sure exactly what the differences arem, but the -gid one works. 
+
+You can set this in the transadv.yml in the data directory before you run the install.  Search for storageClassName: and set it to ibmc-file-gold, or whatever 
+      `storageClassName: ibmc-file-gold-gid`
+
+
+If you're like me and you didn't set this up during the install here is how you fix it after the fact. 
+Go to:
+Administration --> Custom Resource Definitions --> Search for TransAdv --> Instances --> ta --> YAML
+
+Search for storageClassName and set it to: `ibmc-file-gold-gid`
+Click Save.
+
+If the application is already bound to a storage class you'll have to delete the old one. 
+Storage --> Persistent Volumes -  Find Claim ta-XXXXXX-couchdb, click on the ... on the right and select delete
+(Will not actually be removed until all pods connected are deleted/stopped)
+Storage --> Persistent Volume Claims  - Find Claim ta-XXXXXX-couchdb, click on the ... on the right and select delete
+(Again will not actually remove until all pods connected are deleted/stopped)
+Stop the Couchdb pods:
+Workloads --> Deployments  Set Project: TA, and find pod ta-XXXXXX-couchdb.  
+Set the desired number of pods to 0.  This might automatically scale back up to 1, but gives OCP enough time to delete the PVC and PV, so new ones will be created with the correct configuration. 
+
+The PV takes a couple minuted to provision, but TA should come up now. 
+
+
+Installing CP4A
+--
+Finally!  We're ready to install CP4A 
+Run the following command.  **Important** add the option `--skip-tags servicemesh` because we will use the Red Hat service mesh instead of installing our own istio. 
+
 `docker run -v ~/.kube:/root/.kube:z -u 0 -t     -v $PWD/data:/installer/data:z     -e LICENSE=accept     -e ENTITLED_REGISTRY -e ENTITLED_REGISTRY_USER -e ENTITLED_REGISTRY_KEY     "$ENTITLED_REGISTRY/cp/icpa/icpa-installer:4.0.1" install --skip-tags servicemesh`
+
+
+Easy peasy, all done!
+
+
