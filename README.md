@@ -63,11 +63,22 @@ Important to add the `--skip-tags servicemesh` since we installed it manually.
 
 Follow these steps otherwise:
 https://www.ibm.com/support/knowledgecenter/en/SSCSJL_3.x/install-icpa.html
+```
+export ENTITLED_REGISTRY=cp.icr.io
+export ENTITLED_REGISTRY_USER=cp
+export ENTITLED_REGISTRY_KEY=<apikey>
 
-Note: For IBM employees here are steps to get license: 
+docker login "$ENTITLED_REGISTRY" -u "$ENTITLED_REGISTRY_USER" -p "$ENTITLED_REGISTRY_KEY"
+
+mkdir data
+docker run -v $PWD/data:/data:z -u 0 \
+          -e LICENSE=accept \
+          "$ENTITLED_REGISTRY/cp/icpa/icpa-installer:3.0.1.0" cp -r "data/*" /data
+```
+
+Note: For **IBM employees** here are steps to get license: 
 https://github.ibm.com/CloudPakOpenContent/cloudpak-entitlement
-Follow same instructions as above to install, however use ENTITLED_REGISTRY_USER: `ekey` instead of `cp`
+Follow same instructions as above to install, however use `ENTITLED_REGISTRY_USER: ekey` instead of `cp`
 
 
-
-docker run -v ~/.kube:/root/.kube:z -u 0 -t     -v $PWD/data:/installer/data:z     -e LICENSE=accept     -e ENTITLED_REGISTRY -e ENTITLED_REGISTRY_USER -e ENTITLED_REGISTRY_KEY     "$ENTITLED_REGISTRY/cp/icpa/icpa-installer:4.0.1" install --skip-tags servicemesh
+`docker run -v ~/.kube:/root/.kube:z -u 0 -t     -v $PWD/data:/installer/data:z     -e LICENSE=accept     -e ENTITLED_REGISTRY -e ENTITLED_REGISTRY_USER -e ENTITLED_REGISTRY_KEY     "$ENTITLED_REGISTRY/cp/icpa/icpa-installer:4.0.1" install --skip-tags servicemesh`
