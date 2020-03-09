@@ -20,7 +20,7 @@ Following these instructions, but summarizing and customizing for exactly what I
 https://docs.openshift.com/container-platform/4.2/service_mesh/service_mesh_install/installing-ossm.html#ossm-operator-install-istio_installing-ossm
 
 Operators --> OperatorHub --> Search for `Service Mesh`. 
-Select: *Red Hat OpenShift Service Mesh* NOT THE COMMMUNITY ONE (Should be version 1.0.8 (sometimes the GUI shows 1.0.2, but it's actually higher)
+Select: *Red Hat OpenShift Service Mesh* NOT THE COMMMUNITY ONE (Should be version 1.0.8+ (sometimes the GUI shows 1.0.2, but it's actually higher)
 
 
 Create Control Plane
@@ -72,8 +72,8 @@ docker login "$ENTITLED_REGISTRY" -u "$ENTITLED_REGISTRY_USER" -p "$ENTITLED_REG
 
 mkdir data
 docker run -v $PWD/data:/data:z -u 0 \
-          -e LICENSE=accept \
-          "$ENTITLED_REGISTRY/cp/icpa/icpa-installer:3.0.1.0" cp -r "data/*" /data
+           -e LICENSE=accept \
+           "$ENTITLED_REGISTRY/cp/icpa/icpa-installer:4.0.1" cp -r "data/*" /data
 ```
 
 Note: For **IBM employees** here are steps to get license: 
@@ -83,7 +83,13 @@ Follow same instructions as above to install, however use `ENTITLED_REGISTRY_USE
 
 Setting the Storage class for TA
 --
-TA uses couchdb, which needs a PersistentVolume with RWX permissions.  By default OCP on IBM Cloud uses storage class `bmc-block-bronze`, which is block storage.  For block storage you can't have RWX permission.  
+TA uses couchdb, which needs a PersistentVolume with RWX permissions.  There are two ways to solve this.  Easiest is to change the transadv.yml in the data directory
+```
+ persistence:
+      accessMode: "ReadWriteOnce"
+```
+Alternatively you can change the storageclass to allow for ReadWriteMany. 
+By default OCP on IBM Cloud uses storage class `bmc-block-bronze`, which is block storage.  For block storage you can't have RWX permission.  
 
 To fix this, you can set the storage class to file type.  There are many options if you look in Storage --> Storage Classes. 
 I chose `ibmc-file-gold-gid`.  
